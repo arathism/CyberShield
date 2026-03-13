@@ -210,8 +210,7 @@ def test_sqli():
         'patterns_detected': len(detected),
         'verdict': 'SQL Injection Detected!' if vulnerable else 'Input looks clean'
     })
-
-# ---------------- RUN SERVER ----------------
+    
 # ---------------- RUN SERVER ----------------
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
