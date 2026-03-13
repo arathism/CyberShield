@@ -27,7 +27,7 @@ https://cybershield-arathi-0dms.onrender.com
 
 ## 🏗️ System Architecture
 
-![CyberShield Flow]([cybershield_system_flow.jpg](https://github.com/arathism/CyberShield/blob/6370a9912566ccd0be56ff801439c91fb1610058/cybershield_system_flow.jpg.png))
+![CyberShield Flow](https://github.com/arathism/CyberShield/blob/23276a4caa496aba92faed0ef9e531f2f8b5fdbc/cybershield_system_flow.jpg.png)
 
 The system follows a modular architecture:
 
