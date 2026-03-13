@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberShield — Security Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050a0f;
+    --bg2: #0a1520;
+    --bg3: #0f1f30;
+    --accent: #00d4ff;
+    --accent2: #00ff88;
+    --accent3: #ff4757;
+    --accent4: #ffa502;
+    --text: #c8e6f5;
+    --text2: #6a9bb8;
+    --border: #1a3a50;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-main: 'Rajdhani', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-main); min-height: 100vh; }
+  header { padding: 20px 40px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: rgba(10,21,32,0.9); position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 36px; height: 36px; border: 2px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 16px; color: var(--accent); }
+  .logo-text { font-size: 22px; font-weight: 700; letter-spacing: 3px; color: var(--accent); }
+  .logo-sub { font-size: 11px; color: var(--text2); letter-spacing: 2px; font-family: var(--font-mono); }
+  .status-bar { font-family: var(--font-mono); font-size: 12px; color: var(--text2); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); box-shadow: 0 0 6px var(--accent2); display: inline-block; margin-right: 6px; animation: blink 1.5s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  main { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+  .hero { text-align: center; margin-bottom: 48px; }
+  .hero h1 { font-size: 48px; font-weight: 700; letter-spacing: 4px; margin-bottom: 8px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { font-family: var(--font-mono); font-size: 13px; color: var(--text2); letter-spacing: 2px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 32px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab { padding: 12px 24px; font-family: var(--font-main); font-size: 14px; font-weight: 600; letter-spacing: 1.5px; color: var(--text2); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
+  .tab:hover { color: var(--accent); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 20px; }
+  .card-title { font-size: 13px; font-weight: 600; letter-spacing: 2px; color: var(--accent); margin-bottom: 20px; font-family: var(--font-mono); text-transform: uppercase; }
+  .input-row { display: flex; gap: 12px; margin-bottom: 24px; }
+  input[type="text"], input[type="password"] { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-family: var(--font-mono); font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; }
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--text2); }
+  .btn { padding: 12px 28px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--accent); font-family: var(--font-main); font-size: 14px; font-weight: 600; letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .btn:hover { background: var(--accent); color: var(--bg); }
+  .btn-danger { border-color: var(--accent3); color: var(--accent3); }
+  .btn-danger:hover { background: var(--accent3); color: #fff; }
+  .strength-track { height: 6px; background: var(--bg3); border-radius: 999px; overflow: hidden; margin-bottom: 8px; }
+  .strength-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease, background 0.5s ease; width: 0%; }
+  .strength-text { font-family: var(--font-mono); font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+  .checks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .check-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text2); font-family: var(--font-mono); }
+  .check-badge { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; transition: all 0.3s; }
+  .check-badge.pass { background: var(--accent2); border-color: var(--accent2); color: var(--bg); }
+  .check-badge.fail { background: rgba(255,71,87,0.15); border-color: var(--accent3); color: var(--accent3); }
+  .result-box { background: var(--bg3); border-radius: 8px; padding: 16px; font-family: var(--font-mono); font-size: 13px; border-left: 3px solid var(--accent); display: none; }
+  .result-box.show { display: block; }
+  .result-safe { border-left-color: var(--accent2); }
+  .result-warn { border-left-color: var(--accent4); }
+  .result-danger { border-left-color: var(--accent3); }
+  .port-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 13px; }
+  .port-table th { text-align: left; padding: 10px 14px; color: var(--accent); border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 2px; }
+  .port-table td { padding: 10px 14px; border-bottom: 1px solid rgba(26,58,80,0.5); color: var(--text2); }
+  .port-open { color: var(--accent2) !important; }
+  .flags-list { list-style: none; padding: 0; }
+  .flags-list li { padding: 8px 0; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 12px; color: var(--accent4); display: flex; align-items: center; gap: 8px; }
+  .flags-list li::before { content: '⚑'; }
+  .payload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
+  .payload-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-family: var(--font-mono); font-size: 12px; color: var(--accent3); cursor: pointer; transition: border-color 0.2s; }
+  .payload-item:hover { border-color: var(--accent3); }
+  .loading { display: none; text-align: center; padding: 20px; font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+  .loading.show { display: block; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-family: var(--font-mono); font-size: 13px; color: var(--text); outline: none; resize: vertical; min-height: 80px; transition: border-color 0.2s; margin-bottom: 12px; }
+  textarea:focus { border-color: var(--accent3); }
+  .verdict { display: inline-block; padding: 6px 16px; border-radius: 999px; font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+  .verdict-safe { background: rgba(0,255,136,0.1); color: var(--accent2); border: 1px solid var(--accent2); }
+  .verdict-danger { background: rgba(255,71,87,0.1); color: var(--accent3); border: 1px solid var(--accent3); }
+  footer { text-align: center; padding: 32px; font-family: var(--font-mono); font-size: 11px; color: var(--text2); border-top: 1px solid var(--border); margin-top: 48px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">CS</div>
+    <div>
+      <div class="logo-text">CYBERSHIELD</div>
+      <div class="logo-sub">security dashboard v1.0</div>
+    </div>
+  </div>
+  <div class="status-bar">
+    <span class="status-dot"></span>SYSTEM ONLINE
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>CYBERSHIELD</h1>
+    <p>// AI-POWERED SECURITY ANALYSIS DASHBOARD — BUILT BY ARATHI //</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('password', this)">🔐 PASSWORD</button>
+    <button class="tab" onclick="switchTab('url', this)">🕵️ URL DETECTOR</button>
+    <button class="tab" onclick="switchTab('port', this)">🌐 PORT SCANNER</button>
+    <button class="tab" onclick="switchTab('sqli', this)">💉 SQL INJECTION</button>
+  </div>
+
+  <!-- PASSWORD PANEL -->
+  <div class="panel active" id="panel-password">
+    <div class="card">
+      <div class="card-title">// password strength analyzer</div>
+      <div class="input-row">
+        <input type="password" id="pwInput" placeholder="enter password to analyze..." oninput="analyzePassword()" />
+        <button class="btn" onclick="togglePw()">SHOW</button>
+      </div>
+      <div class="strength-track"><div class="strength-fill" id="strengthFill"></div></div>
+      <div class="strength-text">strength: <span id="strengthLabel" style="color:var(--accent)">—</span> &nbsp;|&nbsp; entropy: <span id="entropyLabel">0</span> bits &nbsp;|&nbsp; crack time: <span id="crackLabel">—</span></div>
+      <div class="checks-grid" style="margin-top:20px;">
+        <div class="check-item"><div class="check-badge" id="cb1">?</div>8+ characters</div>
+        <div class="check-item"><div class="check-badge" id="cb2">?</div>uppercase (A-Z)</div>
+        <div class="check-item"><div class="check-badge" id="cb3">?</div>lowercase (a-z)</div>
+        <div class="check-item"><div class="check-badge" id="cb4">?</div>numbers (0-9)</div>
+        <div class="check-item"><div class="check-badge" id="cb5">?</div>special chars</div>
+        <div class="check-item"><div class="check-badge" id="cb6">?</div>not common</div>
+        <div class="check-item"><div class="check-badge" id="cb7">?</div>no repetitions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- URL PANEL -->
+  <div class="panel" id="panel-url">
+    <div class="card">
+      <div class="card-title">// phishing url detector</div>
+      <div class="input-row">
+        <input type="text" id="urlInput" placeholder="enter URL to scan... e.g. http://suspicious-login.tk" />
+        <button class="btn" onclick="checkURL()">SCAN</button>
+      </div>
+      <div class="loading" id="url-loading"><span class="spinner"></span>SCANNING URL...</div>
+      <div class="result-box" id="url-result"></div>
+    </div>
+  </div>
+
+  <!-- PORT PANEL -->
+  <div class="panel" id="panel-port">
+    <div class="card">
+      <div class="card-title">// network port scanner</div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--accent4);margin-bottom:16px;">⚠ Only scan hosts you own or have permission to scan</div>
+      <div class="input-row">
+        <input type="text" id="hostInput" placeholder="enter IP or domain... e.g. localhost" />
+        <button class="btn" onclick="scanPorts()">SCAN</button>
+      </div>
+      <div class="loading" id="port-loading"><span class="spinner"></span>SCANNING PORTS...</div>
+      <div id="port-result"></div>
+    </div>
+  </div>
+
+  <!-- SQLI PANEL -->
+  <div class="panel" id="panel-sqli">
+    <div class="card">
+      <div class="card-title">// sql injection tester</div>
+      <textarea id="sqliInput" placeholder="paste input to test for SQL injection patterns..."></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-danger" onclick="testSQLi()">ANALYZE INPUT</button>
+        <button class="btn" onclick="clearSQLi()">CLEAR</button>
+      </div>
+      <div class="result-box" id="sqli-result"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">// common sql injection payloads (educational)</div>
+      <p style="font-family:var(--font-mono);font-size:12px;color:var(--text2);margin-bottom:14px;">Click any payload to test it above</p>
+      <div class="payload-grid" id="payloadGrid"></div>
+    </div>
+  </div>
+</main>
+
+<footer>CYBERSHIELD v1.0 &nbsp;|&nbsp; BUILT WITH PYTHON + FLASK &nbsp;|&nbsp; AARTHI © 2025</footer>
+
+<script>
+const COMMON = ["password","123456","password1","qwerty","abc123","letmein","monkey","dragon","master","hello","sunshine","princess","welcome","shadow","football","iloveyou","admin","login","pass","test"];
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function togglePw() {
+  const inp = document.getElementById('pwInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function analyzePassword() {
+  const pw = document.getElementById('pwInput').value;
+  if (!pw) return;
+  const checks = [
+    pw.length >= 8,
+    /[A-Z]/.test(pw),
+    /[a-z]/.test(pw),
+    /[0-9]/.test(pw),
+    /[^a-zA-Z0-9]/.test(pw),
+    !COMMON.includes(pw.toLowerCase()),
+    !(/(.)\1{2,}/.test(pw))
+  ];
+  checks.forEach((pass, i) => {
+    const el = document.getElementById('cb' + (i+1));
+    el.className = 'check-badge ' + (pass ? 'pass' : 'fail');
+    el.textContent = pass ? '✓' : '✗';
+  });
+  const score = checks.filter(Boolean).length;
+  const pct = Math.round((score / 7) * 100);
+  let pool = 0;
+  if (/[a-z]/.test(pw)) pool += 26;
+  if (/[A-Z]/.test(pw)) pool += 26;
+  if (/[0-9]/.test(pw)) pool += 10;
+  if (/[^a-zA-Z0-9]/.test(pw)) pool += 32;
+  const entropy = pool ? Math.round(pw.length * Math.log2(pool)) : 0;
+  const fill = document.getElementById('strengthFill');
+  const label = document.getElementById('strengthLabel');
+  fill.style.width = pct + '%';
+  let color, text;
+  if (score <= 2) { color = '#ff4757'; text = 'VERY WEAK'; }
+  else if (score <= 3) { color = '#ffa502'; text = 'WEAK'; }
+  else if (score <= 4) { color = '#eccc68'; text = 'FAIR'; }
+  else if (score <= 5) { color = '#7bed9f'; text = 'GOOD'; }
+  else if (score <= 6) { color = '#00ff88'; text = 'STRONG'; }
+  else { color = '#00d4ff'; text = 'VERY STRONG'; }
+  fill.style.background = color;
+  label.textContent = text;
+  label.style.color = color;
+  document.getElementById('entropyLabel').textContent = entropy;
+  const secs = pool ? Math.pow(2, entropy) / 1e10 : 0;
+  let crack;
+  if (secs < 1) crack = 'INSTANT';
+  else if (secs < 60) crack = Math.round(secs) + ' SEC';
+  else if (secs < 3600) crack = Math.round(secs/60) + ' MIN';
+  else if (secs < 86400) crack = Math.round(secs/3600) + ' HRS';
+  else if (secs < 31536000) crack = Math.round(secs/86400) + ' DAYS';
+  else if (secs < 3153600000) crack = Math.round(secs/31536000) + ' YRS';
+  else crack = 'CENTURIES';
+  document.getElementById('crackLabel').textContent = crack;
+}
+
+async function checkURL() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  document.getElementById('url-loading').classList.add('show');
+  document.getElementById('url-result').classList.remove('show');
+  try {
+    const res = await fetch('/check-url', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url})
+    });
+    const data = await res.json();
+    const box = document.getElementById('url-result');
+    let cls = data.risk === 'Safe' ? 'result-safe' : data.risk === 'Suspicious' ? 'result-warn' : 'result-danger';
+    let color = data.risk === 'Safe' ? '#00ff88' : data.risk === 'Suspicious' ? '#ffa502' : '#ff4757';
+    let flagsHtml = data.flags.length ? '<ul class="flags-list">' + data.flags.map(f => `<li>${f}</li>`).join('') + '</ul>' : '<p style="color:var(--accent2);margin-top:8px;">No suspicious patterns detected.</p>';
+    box.innerHTML = `<div style="font-size:18px;font-weight:700;color:${color};margin-bottom:10px;">⚡ ${data.risk.toUpperCase()}</div><div style="color:var(--text2);margin-bottom:10px;">URL: ${data.url}</div>${flagsHtml}`;
+    box.className = 'result-box show ' + cls;
+  } catch(e) {
+    document.getElementById('url-result').innerHTML = '<span style="color:var(--accent3)">Error connecting to server</span>';
+    document.getElementById('url-result').classList.add('show');
+  }
+  document.getElementById('url-loading').classList.remove('show');
+}
+
+async function scanPorts() {
+  const host = document.getElementById('hostInput').value.trim();
+  if (!host) return;
+  document.getElementById('port-loading').classList.add('show');
+  document.getElementById('port-result').innerHTML = '';
+  try {
+    const res = await fetch('/scan-ports', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({host})
+    });
+    const data = await res.json();
+    if (data.error) {
+      document.getElementById('port-result').innerHTML = `<div class="result-box show result-danger">${data.error}</div>`;
+    } else {
+      let rows = data.results.map(r => `<tr><td>${r.port}</td><td>${r.service}</td><td class="${r.status==='Open'?'port-open':''}">${r.status}</td></tr>`).join('');
+      document.getElementById('port-result').innerHTML = `
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--text2);margin-bottom:16px;">
+          Host: <span style="color:var(--accent)">${data.host}</span> &nbsp;|&nbsp;
+          IP: <span style="color:var(--accent)">${data.ip}</span> &nbsp;|&nbsp;
+          Open ports: <span style="color:var(--accent2)">${data.open_count}</span>
+        </div>
+        <table class="port-table">
+          <thead><tr><th>PORT</th><th>SERVICE</th><th>STATUS</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+  } catch(e) {
+    document.getElementById('port-result').innerHTML = '<div class="result-box show result-danger">Error. Make sure Flask is running.</div>';
+  }
+  document.getElementById('port-loading').classList.remove('show');
+}
+
+async function testSQLi() {
+  const input = document.getElementById('sqliInput').value.trim();
+  if (!input) return;
+  try {
+    const res = await fetch('/test-sqli', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({input})
+    });
+    const data = await res.json();
+    const box = document.getElementById('sqli-result');
+    const cls = data.vulnerable ? 'result-danger' : 'result-safe';
+    const verdict = data.vulnerable
+      ? `<span class="verdict verdict-danger">⚠ SQL INJECTION DETECTED</span>`
+      : `<span class="verdict verdict-safe">✓ INPUT LOOKS CLEAN</span>`;
+    box.innerHTML = `<div style="margin-bottom:12px;">${verdict}</div><div style="color:var(--text2);font-size:12px;">Patterns matched: ${data.patterns_detected}</div>`;
+    box.className = 'result-box show ' + cls;
+  } catch(e) {
+    document.getElementById('sqli-result').innerHTML = '<span style="color:var(--accent3)">Error</span>';
+    document.getElementById('sqli-result').classList.add('show');
+  }
+}
+
+function clearSQLi() {
+  document.getElementById('sqliInput').value = '';
+  document.getElementById('sqli-result').className = 'result-box';
+}
+
+async function loadPayloads() {
+  try {
+    const res = await fetch('/sqli-payloads');
+    const data = await res.json();
+    const grid = document.getElementById('payloadGrid');
+    grid.innerHTML = data.payloads.map(p =>
+      `<div class="payload-item" onclick="document.getElementById('sqliInput').value='${p.replace(/'/g,"\\'")}'">${p}</div>`
+    ).join('');
+  } catch(e) {}
+}
+
+loadPayloads();
+</script>
+</body>
+</html>
